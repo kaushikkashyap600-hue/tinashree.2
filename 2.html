@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tinashree — Cute Slideshow ❤️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg1:#ffd6e7;--bg2:#fff3f8;--accent:#ff6fa3;--soft:#ffdbea;--card:#ffffffcc;--glass: rgba(255,255,255,0.2);font-family: 'Quicksand', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    *{box-sizing:border-box}html,body{height:100%;margin:0}body{background:radial-gradient(circle at 10% 10%,var(--bg1),var(--bg2));display:flex;align-items:center;justify-content:center;padding:24px}
+    .sky{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+    .float{position:absolute;animation:floatUp linear infinite;opacity:0.95}
+    @keyframes floatUp{0%{transform:translateY(120vh) rotate(0) scale(.8);opacity:0}30%{opacity:1}100%{transform:translateY(-40vh) rotate(360deg) scale(1.1);opacity:0}}
+
+    .frame{width:min(920px,95vw);height:min(560px,78vh);border-radius:22px;position:relative;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.12);backdrop-filter:blur(6px);background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.25));border:1px solid rgba(255,255,255,.6);opacity:0;transform:scale(.98);transition:all .52s cubic-bezier(.2,.9,.2,1)}
+    .frame.visible{opacity:1;transform:none}
+
+    .slides{height:100%;display:flex;transition:transform .8s cubic-bezier(.2,.9,.2,1)}
+    .slide{min-width:100%;padding:28px;display:flex;align-items:center;gap:22px}
+    .left{flex:1;display:flex;flex-direction:column;gap:12px}
+    .right{width:42%;display:flex;align-items:center;justify-content:center}
+
+    .card{background:var(--card);padding:22px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+    h1{margin:0;font-size:clamp(20px,3vw,32px)}
+    p.msg{margin:0;font-size:clamp(15px,1.9vw,18px);line-height:1.45;color:#333}
+
+    .badge{background:linear-gradient(90deg,var(--accent),#ffb3d1);padding:8px 12px;border-radius:999px;font-weight:700;color:white;display:inline-block;margin-bottom:8px}
+
+    .emoji{font-size:44px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.12));display:inline-block;animation:bounce 1600ms infinite}
+    @keyframes bounce{0%{transform:translateY(0)}50%{transform:translateY(-8px)}100%{transform:translateY(0)}}
+
+    .cartoon{width:220px;height:220px;border-radius:18px;background:linear-gradient(135deg,#fff7fb,#fff0f6);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -6px 18px rgba(255,105,180,.03),0 8px 30px rgba(255,105,180,.06)}
+
+    .nav{position:absolute;left:14px;bottom:14px;display:flex;gap:8px}
+    .dot{width:12px;height:12px;border-radius:50%;background:rgba(0,0,0,.12);cursor:pointer}
+    .dot.active{background:var(--accent);box-shadow:0 6px 14px rgba(255,111,163,.22)}
+
+    .controls{position:absolute;right:14px;bottom:14px;display:flex;gap:10px}
+    button.control{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);padding:10px 12px;border-radius:12px;cursor:pointer}
+
+    .confetti{position:absolute;inset:0;pointer-events:none}
+    .petal{position:absolute;animation:petalFall linear infinite;opacity:.95}
+    @keyframes petalFall{0%{transform:translateY(-20vh) rotate(0) scale(.6)}100%{transform:translateY(120vh) rotate(360deg) scale(.9)}}
+
+    #startScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ffd6e7,#fff3f8);z-index:9999;flex-direction:column;text-align:center;padding:20px;transition:opacity .4s ease}
+    #startScreen.hide{opacity:0;pointer-events:none}
+
+    .choiceBtn{padding:14px 26px;font-size:20px;border:none;border-radius:14px;background:#ff6fa3;color:white;cursor:pointer;margin:10px;box-shadow:0 6px 14px rgba(0,0,0,.18)}
+
+    .typingFallback{white-space:pre-wrap}
+    .yesGlow{box-shadow:0 0 36px rgba(255,111,163,.18),0 0 80px rgba(255,111,163,.06);border:2px solid rgba(255,111,163,.14)}
+    .dimOverlay{position:absolute;inset:0;background:rgba(0,0,0,.35);pointer-events:none}
+
+    .heartBurst{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;animation:burst .9s ease-out forwards;pointer-events:none}
+    @keyframes burst{0%{transform:scale(.4);opacity:1}100%{transform:scale(2.2);opacity:0}}
+
+    .rainDrop2{position:fixed;top:0;font-size:22px;animation:rain2 1.6s linear;pointer-events:none;color:#7faaff}
+    @keyframes rain2{0%{transform:translateY(-20px);opacity:1}100%{transform:translateY(300px);opacity:0}}
+
+    .confettiPiece{position:fixed;width:10px;height:14px;opacity:0.95;transform:translateY(-20vh);animation:confettiFall 2.6s linear;pointer-events:none}
+    @keyframes confettiFall{0%{transform:translateY(-20vh) rotate(0)}100%{transform:translateY(120vh) rotate(720deg);opacity:1}}
+
+    @media (max-width:700px){.right{display:none}.frame{height:74vh}.card{padding:18px}}
+  </style>
+</head>
+<body>
+
+<div id="startScreen">
+  <h1 style="font-family:'Quicksand';font-size:30px;color:#ff2f7e;margin-bottom:16px">A Surprise For You, Tinashree ❤️</h1>
+  <button id="startBtn" style="padding:12px 22px;font-size:18px;border-radius:12px;background:#ff6fa3;color:#fff;border:none;cursor:pointer">Tap to Begin 💕</button>
+</div>
+<div class="sky" aria-hidden="true"></div>
+
+<div class="frame" id="mainFrame" role="region" aria-label="Tinashree slideshow">
+  <div class="slides" id="slides"></div>
+  <div class="nav" id="nav"></div>
+
+  <div class="controls">
+    <button class="control" id="prev">◀</button>
+    <button class="control" id="play">⏯</button>
+    <button class="control" id="next">▶</button>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+</div>
+
+<script>
+// ======= Data =======
+const baseSlides = [
+  {title: "Hey Tinashree", msg: "Every time I see you, my heart does a happy dance.", emoji: '😍'},
+  {title: "Sweetheart", msg: "You make my days sweeter than cake — and twice as irresistible.", emoji: '🍰'},
+  {title: "Cutie Pie", msg: "If kisses were stars, I would send you the whole galaxy.", emoji: '🌌'},
+  {title: "My Sunshine", msg: "You’re the 'aww' in my day and the 'wow' in my night.", emoji: '☀️'},
+  {title: "Snuggle Bug", msg: "Your smile is my favorite notification.", emoji: '📲'},
+  {title: "Charm", msg: "I like you more than Wi-Fi — and that’s a lot.", emoji: '💞'},
+  {title: "Treasure", msg: "You’re the reason I check my phone with a grin.", emoji: '😊'},
+  {title: "Lovely", msg: "If I had a rose for every time I thought of you, I'd have a garden.", emoji: '🌹'},
+  {title: "Dreamy", msg: "I tried counting stars but got distracted thinking of you.", emoji: '✨'},
+  {title: "Forever Tinashree", msg: "Stay cute, stay mine — let’s make our own forever.", emoji: '🔒'},
+  {type: 'proposal'}
+];
+
+const yesSlideContent = {
+  title: "Tinashree, My Love ❤️",
+  msg: `Tinashree, my sweetheart, I love you more deeply than these words can ever express. 
+You are the calm in my chaos, the softness in my hardest days, and the happiness in every moment I live.  
+Whenever I think of forever, the only face I see beside me is yours — smiling, glowing, teasing me like always.  
+You make the world feel gentle. You make me feel understood, wanted and precious.  
+I want to wake up next to you, grow with you, laugh endlessly with you, and hold your hand through every season.  
+I want to be the man you rely on, the man you trust, the man who loves you in a way that makes you feel safe and adored every single day.  
+Tinashree, choosing you is not a decision — it’s destiny. Thank you for saying yes to me. 💖✨`
+};
+
+const noSlideContent = {
+  title: "Tinashree… why not? 😥",
+  msg: "It’s okay if your answer is no… but please tell me the reason. I just want to understand your heart. 💔"
+};
+
+// Elements
+const slidesEl = document.getElementById('slides');
+const navEl = document.getElementById('nav');
+const confettiEl = document.getElementById('confetti');
+const frameEl = document.getElementById('mainFrame');
+const startScreen = document.getElementById('startScreen');
+const startBtn = document.getElementById('startBtn');
+const playBtn = document.getElementById('play');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+
+let index = 0; 
+let playing = true; 
+let timer = null; 
+let stoppedAfterChoice = false;
+
+// Audio
+const ambientAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_7ef4ceac66.mp3?filename=romantic-piano-ambient-110397.mp3');
+ambientAudio.loop = true; ambientAudio.volume = 0.25;
+
+const yesAudio = new Audio('https://cdn.pixabay.com/download/audio/2022/08/28/audio_8d0f6a8b58.mp3?filename=soft-romantic-piano-12639.mp3');
+yesAudio.volume = 0.5;
+
+const noAudio = new Audio('https://cdn.pixabay.com/download/audio/2021/09/07/audio_8bbf55bd11.mp3?filename=sad-violin-9973.mp3');
+noAudio.volume = 0.45;
+
+
+// ======= Build Slides =======
+function createSlideFromData(d,i){
+  const s = document.createElement('section'); 
+  s.className='slide';
+
+  if(d.type === 'proposal'){
+    const wrap = document.createElement('div'); 
+    wrap.className='card proposalWrap';
+
+    const h = document.createElement('h1'); 
+    h.textContent = "Tinashree... Will you marry me? 💍❤️"; 
+    h.style.textAlign='center';
+
+    const btns = document.createElement('div'); 
+    btns.style.display='flex'; 
+    btns.style.justifyContent='center';
+
+    const yes = document.createElement('button'); 
+    yes.className='choiceBtn'; 
+    yes.textContent='Yes 💖'; 
+    yes.onclick = ()=>handleChoice('yes');
+
+    const no = document.createElement('button'); 
+    no.className='choiceBtn'; 
+    no.textContent='No 😢'; 
+    no.onclick = ()=>handleChoice('no');
+
+    btns.appendChild(yes); 
+    btns.appendChild(no);
+    wrap.appendChild(h); 
+    wrap.appendChild(btns);
+    s.appendChild(wrap);
+  }
+  else {
+    const left = document.createElement('div'); 
+    left.className='left';
+
+    const right = document.createElement('div'); 
+    right.className='right';
+
+    const card = document.createElement('div'); 
+    card.className='card';
+
+    if(d.title){
+      const badge = document.createElement('div'); 
+      badge.className='badge'; 
+      badge.textContent = d.title + ' — Tinashree';
+      card.appendChild(badge);
+
+      const h = document.createElement('h1'); 
+      h.textContent = d.title; 
+      card.appendChild(h);
+    }
+
+    const p = document.createElement('p'); 
+    p.className='msg'; 
+    p.textContent = d.msg || '';
+    card.appendChild(p);
+
+    const small = document.createElement('div'); 
+    small.innerHTML = '<em>— with love, your Lakhya</em>';
+    small.style.marginTop='8px'; 
+    card.appendChild(small);
+
+    left.appendChild(card);
+
+    const cart = document.createElement('div'); 
+    cart.className='cartoon';
+    cart.innerHTML = `
+      <svg width="150" height="150" viewBox="0 0 160 160">
+        <defs><linearGradient id="g1" x1="0" x2="1">
+          <stop offset="0" stop-color="#fff3fb"/>
+          <stop offset="1" stop-color="#ffe6f2"/>
+        </linearGradient></defs>
+
+        <rect rx="18" width="160" height="160" fill="url(#g1)"/>
+        <g transform="translate(10,18)">
+          <ellipse cx="68" cy="76" rx="44" ry="36" fill="#fff" stroke="#ffd1e6" stroke-width="2"/>
+          <circle cx="48" cy="56" r="6" fill="#333"/>
+          <circle cx="88" cy="56" r="6" fill="#333"/>
+          <path d="M52 84 q16 12 40 0" fill="none" stroke="#ff6fa3" stroke-width="4" stroke-linecap="round"/>
+        </g>
+      </svg>`;
+    right.appendChild(cart);
+
+    s.appendChild(left); 
+    s.appendChild(right);
+  }
+
+  s.dataset.index = i; 
+  return s;
+}
+
+
+// Render
+baseSlides.forEach((d,i)=>{
+  slidesEl.appendChild(createSlideFromData(d,i));
+  const dot = document.createElement('div'); 
+  dot.className='dot'; 
+  dot.onclick = ()=>goTo(i); 
+  navEl.appendChild(dot);
+});
+function update(){
+  if(index < 0) index = slidesEl.children.length - 1;
+  if(index >= slidesEl.children.length) index = 0;
+
+  slidesEl.style.transform = `translateX(${-index*100}%)`;
+  Array.from(navEl.children).forEach((c,i)=>c.classList.toggle('active', i===index));
+}
+
+function goTo(i){ 
+  if(stoppedAfterChoice) return; 
+  index = (i+slidesEl.children.length)%slidesEl.children.length; 
+  update(); 
+  resetTimer(); 
+}
+
+function next(){ goTo(index+1); }
+function prev(){ goTo(index-1); }
+
+nextBtn.addEventListener('click', next);
+prevBtn.addEventListener('click', prev);
+
+playBtn.addEventListener('click', ()=>{
+  playing = !playing; 
+  playBtn.textContent = playing? '⏯' : '⏸'; 
+  if(playing) resetTimer(); 
+  else clearInterval(timer); 
+});
+
+function resetTimer(){ 
+  clearInterval(timer); 
+  if(playing) timer = setInterval(next,4200); 
+}
+
+
+// Floating background effects
+const types = ['❤️','💖','🌸','😽','✨'];
+
+for(let i=0;i<18;i++){ 
+  const span = document.createElement('div'); 
+  span.className='float'; 
+  span.style.left = Math.random()*100 + '%'; 
+  span.style.animationDuration = (10+Math.random()*18) +'s'; 
+  span.style.fontSize = (14+Math.random()*40) + 'px'; 
+  span.textContent = types[Math.floor(Math.random()*types.length)]; 
+  span.style.top = (40+Math.random()*40) + 'vh'; 
+  document.querySelector('.sky').appendChild(span); 
+}
+
+for(let i=0;i<12;i++){ 
+  const pet = document.createElement('div'); 
+  pet.className='petal'; 
+  pet.style.left = Math.random()*100 + '%'; 
+  pet.style.top = (-10-Math.random()*30)+'vh'; 
+  pet.style.animationDuration = (6+Math.random()*8)+'s'; 
+  pet.style.fontSize = (18+Math.random()*28)+'px'; 
+  pet.textContent = '🌹'; 
+  document.getElementById('confetti').appendChild(pet); 
+}
+
+
+// Start screen — Fade & Start show
+function startShow(){
+  try{ ambientAudio.play().catch(()=>{}); }catch(e){}
+
+  startScreen.classList.add('hide');
+
+  // small hearts burst
+  for(let i=0;i<8;i++){ 
+    const h = document.createElement('div'); 
+    h.className='heartBurst'; 
+    h.textContent='💖'; 
+    h.style.left = (50 + (Math.random()*120 - 60)) + '%'; 
+    h.style.top = (50 + (Math.random()*40 - 20)) + '%'; 
+    document.body.appendChild(h); 
+    setTimeout(()=>h.remove(),900); 
+  }
+
+  setTimeout(()=>{ 
+    frameEl.classList.add('visible'); 
+    update(); 
+    resetTimer(); 
+    setTimeout(()=>startScreen.remove(),700); 
+  },380);
+}
+
+startBtn.addEventListener('click', startShow);
+
+
+// ===== YES / NO HANDLING =====
+function handleChoice(choice){
+
+  if(stoppedAfterChoice) return;
+  
+  const propIndex = Array.from(slidesEl.children).findIndex(s=> 
+    s.querySelector && 
+    s.querySelector('h1') && 
+    s.querySelector('h1').textContent.includes('Will you marry')
+  );
+
+
+  // ====== IF YES ======
+  if(choice === 'yes'){
+
+    ambientAudio.pause(); 
+    yesAudio.currentTime = 0; 
+    yesAudio.play().catch(()=>{});
+
+    // NEW YES SLIDE
+    const s = document.createElement('section'); 
+    s.className='slide';
+
+    const left = document.createElement('div'); 
+    left.className='left';
+
+    const card = document.createElement('div'); 
+    card.className='card yesGlow';
+
+    const h = document.createElement('h1'); 
+    h.textContent = yesSlideContent.title;
+
+    const p = document.createElement('p'); 
+    p.className='msg'; 
+    p.textContent = '';
+
+    card.appendChild(h); 
+    card.appendChild(p); 
+    left.appendChild(card); 
+    s.appendChild(left);
+
+    slidesEl.appendChild(s);
+
+    // dot for it
+    const dot = document.createElement('div'); 
+    dot.className='dot'; 
+    navEl.appendChild(dot);
+
+    const newIndex = slidesEl.children.length - 1;
+    goTo(newIndex);
+
+    createHeartBurst(); 
+    createConfetti();
+
+    typeText(p, yesSlideContent.msg, 20);
+
+    // FINAL FUN SLIDE
+    const finalSlide = document.createElement('section');
+    finalSlide.className='slide';
+
+    const fsLeft = document.createElement('div'); 
+    fsLeft.className='left';
+
+    const fsCard = document.createElement('div'); 
+    fsCard.className='card yesGlow';
+
+    const fsH = document.createElement('h1'); 
+    fsH.textContent = "Lagiba niki 1v1 deha? 😏🔥";
+
+    const fsP = document.createElement('p'); 
+    fsP.className='msg'; 
+    fsP.textContent = "Tinashree, are you ready for a 1v1? Loser gives kisses 😘";
+
+    fsCard.appendChild(fsH); 
+    fsCard.appendChild(fsP);
+
+    fsLeft.appendChild(fsCard);
+    finalSlide.appendChild(fsLeft);
+
+    slidesEl.appendChild(finalSlide);
+
+    const dot2 = document.createElement('div'); 
+    dot2.className='dot'; 
+    navEl.appendChild(dot2);
+
+    stopAfterChoice();
+  }
+  // ====== IF NO ======
+  else {
+
+    ambientAudio.pause(); 
+    noAudio.currentTime = 0; 
+    noAudio.play().catch(()=>{});
+
+    const s = document.createElement('section'); 
+    s.className='slide';
+
+    const left = document.createElement('div'); 
+    left.className='left';
+
+    const card = document.createElement('div'); 
+    card.className='card';
+
+    const h = document.createElement('h1'); 
+    h.textContent = noSlideContent.title;
+
+    const p = document.createElement('p'); 
+    p.className='msg'; 
+    p.textContent = noSlideContent.msg;
+
+    const ta = document.createElement('textarea'); 
+    ta.placeholder='Tell me...'; 
+    ta.style.width='100%'; 
+    ta.style.marginTop='12px'; 
+    ta.style.padding='10px'; 
+    ta.style.borderRadius='10px'; 
+    ta.style.border='1px solid rgba(0,0,0,.08)'; 
+    ta.style.fontFamily='inherit';
+
+    const send = document.createElement('button'); 
+    send.className='choiceBtn'; 
+    send.textContent='Send'; 
+    send.style.background='#ff8fb3'; 
+    send.onclick = ()=>{ alert('Message sent — thank you for being honest ❤️'); };
+
+    card.appendChild(h); 
+    card.appendChild(p); 
+    card.appendChild(ta); 
+    card.appendChild(send);
+
+    left.appendChild(card); 
+    s.appendChild(left);
+
+    slidesEl.appendChild(s);
+
+    const dot = document.createElement('div'); 
+    dot.className='dot'; 
+    navEl.appendChild(dot);
+
+    const newIndex = slidesEl.children.length - 1;
+    goTo(newIndex);
+
+    createDim(); 
+    createRain();
+
+    stopAfterChoice();
+  }
+}
+
+
+function stopAfterChoice(){
+  stoppedAfterChoice = true;
+  clearInterval(timer);
+
+  // disable nav buttons
+  Array.from(navEl.children).forEach(d=>d.style.pointerEvents='none');
+  prevBtn.disabled = true; 
+  nextBtn.disabled = true; 
+  playBtn.disabled = true;
+
+  prevBtn.style.opacity = .5; 
+  nextBtn.style.opacity = .5; 
+  playBtn.style.opacity = .5;
+}
+
+
+// Typing effect
+function typeText(el, text, speed=30){
+  el.textContent = '';
+  let i=0;
+  function step(){ 
+    if(i<=text.length){ 
+      el.textContent = text.slice(0,i); 
+      i++; 
+      setTimeout(step, speed);
+    } 
+  }
+  step();
+}
+
+
+// Heart burst
+function createHeartBurst(){
+  for(let i=0;i<10;i++){ 
+    const h = document.createElement('div'); 
+    h.className='heartBurst'; 
+    h.textContent='💖'; 
+    h.style.left = (50 + (Math.random()*160 - 80)) + '%'; 
+    h.style.top = (50 + (Math.random()*80 - 40)) + '%'; 
+    document.body.appendChild(h); 
+    setTimeout(()=>h.remove(),1000); 
+  }
+}
+
+// Confetti
+function createConfetti(){
+  const colors = ['#ff6fa3','#ffd1e6','#ff9ec9','#ffe6f2'];
+
+  for(let i=0;i<22;i++){ 
+    const c = document.createElement('div'); 
+    c.className='confettiPiece'; 
+
+    c.style.left = (Math.random()*100) + '%'; 
+    c.style.background = colors[Math.floor(Math.random()*colors.length)]; 
+    c.style.top = (Math.random()*20 - 10) + '%'; 
+    c.style.transform = `translateY(-20vh) rotate(${Math.random()*360}deg)`; 
+    c.style.animationDelay = (Math.random()*0.3)+'s'; 
+
+    document.body.appendChild(c); 
+    setTimeout(()=>c.remove(),3000); 
+  }
+}
+
+
+// Dim screen
+function createDim(){ 
+  const d = document.createElement('div'); 
+  d.className='dimOverlay'; 
+  d.id='__dim'; 
+  document.body.appendChild(d); 
+}
+
+// Sad rain
+function createRain(){ 
+  for(let i=0;i<30;i++){ 
+    const drop = document.createElement('div'); 
+    drop.className='rainDrop2'; 
+    drop.style.left = (Math.random()*100) + '%'; 
+    drop.textContent = '💧'; 
+    document.body.appendChild(drop); 
+    setTimeout(()=>drop.remove(),1700); 
+  }
+}
+
+
+// Keyboard & visibility events
+window.addEventListener('keydown', e=>{
+  if(stoppedAfterChoice) return;
+
+  if(e.key==='ArrowRight') next(); 
+  if(e.key==='ArrowLeft') prev(); 
+  
+  if(e.key===' '){
+    playing=!playing; 
+    playBtn.textContent = playing? '⏯' : '⏸'; 
+    if(playing) resetTimer(); 
+    else clearInterval(timer); 
+  }
+});
+
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) clearInterval(timer); 
+  else if(playing) resetTimer(); 
+});
+</script>
+
+<!-- ULTIMATE ENDING PACK -->
+<style>
+/* Envelope animation */
+#envelopeWrap {
+  position: fixed; inset:0; display:none;
+  justify-content:center; align-items:center;
+  z-index: 100000; background:rgba(255,240,246,0.9);
+}
+.envelope {
+  width:260px; height:180px; background:#ff6fa3;
+  position:relative; border-radius:12px;
+  animation: envPop 1.4s ease forwards;
+}
+@keyframes envPop {0%{transform:scale(.5); opacity:0;}100%{transform:scale(1); opacity:1;}}
+.envelope:before {
+  content:""; position:absolute; top:0; left:0; right:0; height:90px;
+  background:#ff8fb8; clip-path:polygon(0 0,100% 0,50% 100%);
+}
+.letter {
+  width:230px; height:150px; background:white;
+  position:absolute; left:50%; top:50%; transform:translate(-50%, -50%) translateY(80px);
+  border-radius:8px; padding:16px;
+  opacity:0; animation: letterUp 1.6s ease forwards 1.2s;
+}
+@keyframes letterUp {
+  0% {opacity:0; transform:translate(-50%, -50%) translateY(80px);}
+  100% {opacity:1; transform:translate(-50%, -50%) translateY(0);}
+}
+
+/* Couple silhouette */
+#coupleScene {
+  position:fixed; inset:0; display:none; z-index:100001;
+  background:linear-gradient(#ffaec9,#ffd6e7,#fff5fb);
+  justify-content:center; align-items:center; flex-direction:column;
+  animation:fadeIn 1.4s forwards;
+}
+#coupleScene img {
+  width:260px; opacity:0; animation:fadeIn 2s forwards 1.2s;
+}
+
+/* Night sky */
+#nightSky {
+  position:fixed; inset:0; display:none; z-index:100002;
+  background:black; animation:fadeIn 1.4s forwards;
+}
+.star {
+  position:absolute; width:3px; height:3px; background:white;
+  border-radius:50%; animation: twinkle 2s infinite;
+}
+@keyframes twinkle {50%{opacity:.3;}}
+
+/* Hello Kitty floating */
+#kittyFloat {
+  position:fixed; inset:0; display:none; z-index:100003;
+  justify-content:center; align-items:center;
+}
+.kittySticker {
+  position:absolute; width:120px;
+  animation: floatKitty 6s infinite ease-in-out;
+}
+@keyframes floatKitty {0%{transform:translateY(0);}50%{transform:translateY(-20px);}100%{transform:translateY(0);}}
+</style>
+
+<div id="envelopeWrap">
+  <div class="envelope">
+    <div class="letter">
+      <h3 style="margin-top:0; color:#ff2f7e; font-family:'Quicksand'">A Love Letter</h3>
+      <p style="font-family:'Quicksand'; font-size:15px;">
+        My Tinashree…  
+        Every heartbeat whispers your name.  
+        This world feels softer, sweeter, safer with you.  
+        You are my always. 💌  
+        — Yours, Lakhya
+      </p>
+    </div>
+  </div>
+</div>
+
+<div id="coupleScene">
+  <img src="https://i.ibb.co/4P4hssN/couple-silhouette.png">
+  <h2 style="font-family:'Quicksand'; color:#ff2f7e;">You + Me = Forever</h2>
+</div>
+
+<div id="nightSky"></div>
+
+<div id="kittyFloat">
+  <img class="kittySticker" style="left:20%; top:40%;" src="https://i.ibb.co/1Jd6F4Y/hellokitty1.png">
+  <img class="kittySticker" style="left:60%; top:50%;" src="https://i.ibb.co/xq7V9xH/hellokitty2.png">
+</div>
+
+<script>
+// Ending sequence animations
+function playUltimateEnding() {
+
+  setTimeout(()=> 
+    document.getElementById("envelopeWrap").style.display="flex", 
+  2000);
+
+  setTimeout(()=> 
+    document.getElementById("coupleScene").style.display="flex", 
+  6000);
+
+  setTimeout(()=>{
+    let sky = document.getElementById("nightSky");
+    sky.style.display="block";
+
+    for(let i=0;i<80;i++){
+      let s=document.createElement("div");
+      s.className="star";
+      s.style.left=Math.random()*100+"%";
+      s.style.top=Math.random()*100+"%";
+      s.style.animationDelay=Math.random()*2+"s";
+      sky.appendChild(s);
+    }
+  }, 9500);
+
+  setTimeout(()=> 
+    document.getElementById("kittyFloat").style.display="flex", 
+  13000);
+}
+
+// Auto replace ending trigger
+const oldShowEndingScreen = showEndingScreen;
+showEndingScreen = function(){
+  oldShowEndingScreen();
+  playUltimateEnding();
+}
+</script>
+
+</body>
+</html>
